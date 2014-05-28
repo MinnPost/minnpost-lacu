@@ -14,9 +14,13 @@ A list of datasets can be found from this [JS file](http://deli.dnr.state.mn.us/
 
 * [DNR Lake Bathymetric Contours](http://deli.dnr.state.mn.us/metadata.html?id=L390001700202)
     * [Data request link](http://deli.dnr.state.mn.us/cgi-bin/bundle.pl?layer=L390001700202&email=get%40data.com&assemblytype=tiles&data=bath_contln3+mn&kbytes=1)
-    * [Direct bundle](ftp://ftp.dnr.state.mn.us/pub/deli/d31302343658330.zip)
-    * `wget ftp://ftp.dnr.state.mn.us/pub/deli/d31302343658330.zip -O data/bath_contln3.zip && unzip data/bath_contln3.zip -d data/bath_contln3`
-    http://deli.dnr.state.mn.us/cgi-bin/bundle.pl?layer=L390001400201&email=get%40data.com&assemblytype=tiles&data=bdry_rg02py2+mn&kbytes=624  
+    * (time specific) [Direct bundle](ftp://ftp.dnr.state.mn.us/pub/deli/d31302343658330.zip)
+* [DNR 100K Lakes and Rivers](http://deli.dnr.state.mn.us/metadata.html?id=L390003700201)
+    * [Data request link](http://deli.dnr.state.mn.us/cgi-bin/bundle.pl?layer=L390003700201&email=get%40data.com&assemblytype=tiles&data=lake_dnrpy2+mn&kbytes=1)
+    * (time specific) [Direct bundle](ftp://ftp.dnr.state.mn.us/pub/deli/d15079344790019.zip)
+
+
+
 
 
 
