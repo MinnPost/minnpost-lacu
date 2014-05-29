@@ -8,6 +8,12 @@ body {
   text-align: center;
 }
 
+#application-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
 #application-container .lake-outline {
   fill: #33CCFF;
   fill-opacity: 0.75;
