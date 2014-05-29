@@ -1,0 +1,17 @@
+/**
+ * CSS for Lacu
+ */
+
+body {
+  background-color: #000000;
+  color: #F2F2F2;
+  text-align: center;
+}
+
+#application-container .lake-outline {
+  fill: #33CCFF;
+  fill-opacity: 0.75;
+  stroke-linejoin: round;
+  stroke: #33CCFF;
+  stroke-width: 5px;
+}

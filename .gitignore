@@ -1,3 +1,8 @@
 # BIG data
-data/*shp
-data/*.zip
+data/original/*
+data/build/*
+
+
+# Common
+node_modules
+bower_components

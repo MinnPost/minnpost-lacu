@@ -1,0 +1,28 @@
+{
+  "name": "minnpost-lacu",
+  "version": "0.0.1",
+  "description": "All the lakes!",
+  "main": "js/app.js",
+  "dependencies": {
+    "shapefile": "^0.3.0",
+    "lodash": "^2.4.1",
+    "turf": "^0.1.6",
+    "d3": "^3.4.8",
+    "topojson": "^1.6.13",
+    "d3-geo-projection": "^0.2.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MinnPost/minnpost-lacu.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MinnPost/minnpost-lacu/issues"
+  },
+  "homepage": "https://github.com/MinnPost/minnpost-lacu"
+}

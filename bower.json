@@ -1,0 +1,23 @@
+{
+  "name": "minnpost-lacu",
+  "version": "0.0.1",
+  "homepage": "https://github.com/MinnPost/minnpost-lacu",
+  "authors": [
+    "Alan Palazzolo <apalazzolo@minnpost.com>"
+  ],
+  "description": "All the lakes!",
+  "main": "index.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.4.8",
+    "html5-boilerplate": "~4.3.0",
+    "topojson": "~1.6.13"
+  }
+}
