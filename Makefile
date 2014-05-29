@@ -17,6 +17,8 @@ lake_gdb_root := data/build/water_dnr_hydrography-gdb
 lake_gdb := data/build/water_dnr_hydrography-gdb/water_dnr_hydrography/water_dnr_hydrography.gdb
 lake_converted := $(converted_shps_dir)/water_dnr_hydrography.shp
 
+processing_script := data-processing/process-lakes.js
+processed_data := data/lakes.json
 
 
 # Download sources
@@ -52,24 +54,15 @@ $(bath_converted): $(bath_shape)
 
 $(lake_converted): $(lake_gdb)
 	mkdir -p $(converted_shps_dir)
-	ogr2ogr -f "ESRI Shapefile" $(lake_converted) $(lake_gdb) -t_srs "EPSG:4326"
+	ogr2ogr -f "ESRI Shapefile" $(lake_converted) $(lake_gdb) -overwrite -t_srs "EPSG:4326"
 
 convert: $(bath_converted) $(lake_converted)
 
 
-# Topojson
-data/lakes.topo.json: reproject
-	topojson \
-		--width 900 \
-		--height 600 \
-		--margin 20 \
-		--bbox \
-		-s 0.01 \
-		--projection "d3.geo.albersUsa()" \
-		--id-property "DOWLKNUM" \
-		-p \
-		-o data/lakes.topo.json \
-		-- lakes="data/build/filtered_4326-shps/lake_dnrpy2.shp"
+# Combine and process
+$(processed_data): $(lake_converted)
+	node $(processing_script)
+
 
 # Main
-main: data/lakes.topo.json
+all: $(processed_data)
