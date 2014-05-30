@@ -15,15 +15,27 @@ require('d3-geo-projection')(d3);
 
 // Inputs and outputs
 var lakesShapefile = path.join(__dirname, '../data/build/filtered_4326-shps/lake_dnrpy2.shp');
-var lakesOutput = path.join(__dirname, '../data/lakes.topo.json');
+var lakesOutput = path.join(__dirname, '../data/lakes.json');
 var finalLakes = [];
 
 // Configuration
 var idProp = 'DOWLKNUM';
 var canvasWidth = 900;
 var canvasHeight = 600;
-var marginMin = 0.03;
-var marginMax = 0.15;
+var marginMin = 0.05;
+var marginMax = 0.20;
+var acreMin = 10;
+var acreMax = 500;
+
+// Determine margin from acreage
+function marginFromAcreage(acres) {
+  if (acres > acreMax) {
+    return marginMin;
+  }
+  return marginMax - (((acres - acreMin) / (acreMax - acreMin)) *
+    (marginMax - marginMin));
+}
+
 
 // Get those shapes
 shapefile.read(lakesShapefile, function(error, collection) {
@@ -36,6 +48,7 @@ shapefile.read(lakesShapefile, function(error, collection) {
   // canvas
   collection.features.forEach(function(f, fi) {
     var geojson = { type: 'FeatureCollection', features: [f] };
+    var acres = f.properties.ACRES;
 
     // Reproject
     geojson = d3.geo.project(geojson, d3.geo.albersUsa());
@@ -60,7 +73,7 @@ shapefile.read(lakesShapefile, function(error, collection) {
     topo = topojson.scale(topo, {
       width: canvasWidth,
       height: canvasHeight,
-      margin: marginMin * canvasWidth
+      margin: marginFromAcreage(acres) * canvasWidth
     });
 
     // Remove bounding box
@@ -70,6 +83,11 @@ shapefile.read(lakesShapefile, function(error, collection) {
     finalLakes.push(topo);
   });
 
-  // Save out final
+  // Sort and save out final
+  finalLakes.sort(function(a, b) {
+    var x = a.objects.l.geometries[0].properties.a;
+    var y = b.objects.l.geometries[0].properties.a;
+    return (x < y) ? -1 : ((x > y) ? 1 : 0);
+  });
   fs.writeFileSync(lakesOutput, JSON.stringify(finalLakes));
 });

@@ -20,4 +20,5 @@ body {
   stroke-linejoin: round;
   stroke: #33CCFF;
   stroke-width: 5px;
+  stroke-opacity: 1;
 }
