@@ -9,7 +9,8 @@
     "turf": "^0.1.6",
     "d3": "^3.4.8",
     "topojson": "^1.6.13",
-    "d3-geo-projection": "^0.2.9"
+    "d3-geo-projection": "^0.2.9",
+    "collections": "^1.1.0"
   },
   "devDependencies": {},
   "scripts": {

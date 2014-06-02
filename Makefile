@@ -11,10 +11,10 @@ bath_shape_root := data/build/bath_contln3-shp
 bath_shape := data/build/bath_contln3-shp/mndnrdata/state/mn/bath_contln3.shp
 bath_converted := $(converted_shps_dir)/bath_contln3.shp
 
-lake_source := ftp://ftp.dnr.state.mn.us/pub/gisftp/hawatson/water_dnr_hydrography.zip
+lake_source := ftp://ftp.dnr.state.mn.us/pub/gisftp/hawatson/shapefiles.zip
 lake_source_local := data/original/water_dnr_hydrography.zip
-lake_gdb_root := data/build/water_dnr_hydrography-gdb
-lake_gdb := data/build/water_dnr_hydrography-gdb/water_dnr_hydrography/water_dnr_hydrography.gdb
+lake_shape_root := data/build/water_dnr_hydrography-shp
+lake_shape := data/build/water_dnr_hydrography-shp/dnr_hydro_features_all.shp
 lake_converted := $(converted_shps_dir)/water_dnr_hydrography.shp
 
 processing_script := data-processing/process-lakes.js
@@ -39,12 +39,12 @@ $(bath_shape): $(bath_source_local)
 	unzip $(bath_source_local) -d $(bath_shape_root)
 	touch $(bath_shape)
 
-$(lake_gdb): $(lake_source_local)
+$(lake_shape): $(lake_source_local)
 	mkdir -p data/build
-	unzip $(lake_source_local) -d $(lake_gdb_root)
-	touch $(lake_gdb)
+	unzip $(lake_source_local) -d $(lake_shape_root)
+	touch $(lake_shape)
 
-unpack: $(bath_shape) $(lake_gdb)
+unpack: $(bath_shape) $(lake_shape)
 
 
 # Reproject, filter, convert
@@ -52,9 +52,9 @@ $(bath_converted): $(bath_shape)
 	mkdir -p $(converted_shps_dir)
 	ogr2ogr -f "ESRI Shapefile" $(bath_converted) $(bath_shape) -overwrite -t_srs "EPSG:4326"
 
-$(lake_converted): $(lake_gdb)
+$(lake_converted): $(lake_shape)
 	mkdir -p $(converted_shps_dir)
-	ogr2ogr -f "ESRI Shapefile" $(lake_converted) $(lake_gdb) -overwrite -t_srs "EPSG:4326"
+	ogr2ogr -f "ESRI Shapefile" $(lake_converted) $(lake_shape) -overwrite -where "WB_CLASS LIKE '%lake%' AND ACRES >= 10" -t_srs "EPSG:4326"
 
 convert: $(bath_converted) $(lake_converted)
 

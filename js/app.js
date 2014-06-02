@@ -26,6 +26,9 @@ function Lacu() {
       return;
     }
 
+    // Reset lake index.  Only use when testing
+    //this.resetLakeIndex();
+
     this.lakes = data;
     this.sett();
     data = null;
@@ -56,9 +59,26 @@ function Lacu() {
 
   // Start everything
   this.go = function() {
+    var thisApp = this;
+
+    // Create path projection for lake data
     this.path = d3.geo.path()
       .projection(null);
     this.lakeIndex = this.getLakeIndex();
+
+    // Progress bar
+    var progressData = this.lakeIndex / (this.lakes.length - 1);
+    this.progress = this.svgCanvas.selectAll('.progress')
+      .data([progressData]);
+    this.progress
+      .enter()
+        .append('rect')
+          .attr('class', 'progress')
+          .attr('filter', 'url(#blur-small)')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('width', this.width * 0.05)
+          .attr('height', function(d) { return thisApp.height * d; });
 
     // Start the magic
     this.showLake();
@@ -94,13 +114,14 @@ function Lacu() {
       lake.attr('d', this.path((previousLake) ? previousLakeGeom : lakeGeom))
     }
 
-    // Set index
+    // Set index and update progress
     this.setLakeIndex(this.lakeIndex);
+    this.updateProgress();
 
     // Transition to new lake
     lake
       .transition()
-        .ease('bounce')
+        .ease('sin')
         .duration(this.lakeTime * .4 * 1000)
         .attr('d', this.path(lakeGeom))
       .delay(this.lakeTime * .6 * 1000)
@@ -108,6 +129,14 @@ function Lacu() {
         thisApp.lakeIndex++;
         thisApp.showLake();
       });
+  }
+
+  // Update progress
+  this.updateProgress = function() {
+    var thisApp = this;
+    this.progress = this.svgCanvas.selectAll('.progress')
+      .data([ this.lakeIndex / (this.lakes.length - 1) ])
+      .attr('height', function(d) { return thisApp.height * d; });
   }
 
   // Get lake index

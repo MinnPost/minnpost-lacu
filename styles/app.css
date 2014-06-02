@@ -22,3 +22,10 @@ body {
   stroke-width: 5px;
   stroke-opacity: 1;
 }
+
+#application-container .progress {
+  fill: #F5B800;
+  fill-opacity: 0.5;
+  stroke: none;
+  stroke-width: 0;
+}
