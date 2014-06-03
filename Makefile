@@ -16,6 +16,7 @@ lake_source_local := data/original/water_dnr_hydrography.zip
 lake_shape_root := data/build/water_dnr_hydrography-shp
 lake_shape := data/build/water_dnr_hydrography-shp/dnr_hydro_features_all.shp
 lake_converted := $(converted_shps_dir)/water_dnr_hydrography.shp
+lake_test_converted := $(converted_shps_dir)/water_dnr_hydrography-TEST.shp
 
 processing_script := data-processing/process-lakes.js
 processed_data := data/lakes.json
@@ -56,11 +57,25 @@ $(lake_converted): $(lake_shape)
 	mkdir -p $(converted_shps_dir)
 	ogr2ogr -f "ESRI Shapefile" $(lake_converted) $(lake_shape) -overwrite -where "WB_CLASS LIKE '%lake%' AND ACRES >= 10" -t_srs "EPSG:4326"
 
-convert: $(bath_converted) $(lake_converted)
+# We need to dissolve the lakes because lakes are split up, mid-water, by
+# administrative boundaries, like county or state.
+#
+# It is more efficient and accurate to dissolve the lakes here and combine the
+# properties.
+$(lake_test_converted): $(lake_shape)
+	mkdir -p $(converted_shps_dir)
+	ogr2ogr -f "ESRI Shapefile" $(lake_test_converted) $(lake_shape) -overwrite -dialect SQLite -sql \
+	"SELECT SUBSTR(DOWLKNUM, 1, LENGTH(DOWLKNUM) - 2) AS id, GROUP_CONCAT(DOWLKNUM) AS ids, SUM(ACRES) AS a, SUM(SHORE_MI) AS s, GROUP_CONCAT(LAKE_NAME) AS n, GROUP_CONCAT(CTY_NAME) AS c, ST_Union(geometry) as geometry FROM dnr_hydro_features_all WHERE WB_CLASS LIKE '%lake%' AND ACRES >= 100 AND ACRES < 500 GROUP BY id" -t_srs "EPSG:4326"
+
+convert: $(bath_converted) $(lake_converted) $(lake_test_converted)
+clean_convert:
+	rm -rv $(converted_shps_dir)
+clean_convert_testing:
+	rm -rv $(lake_test_converted)
 
 
 # Combine and process
-$(processed_data): $(lake_converted)
+$(processed_data): $(lake_converted) $(lake_test_converted)
 	node $(processing_script)
 
 
