@@ -6,6 +6,7 @@ body {
   background-color: #000000;
   color: #F2F2F2;
   text-align: center;
+  font-family: Montserrat, Georgia, 'Times New Roman', Times, sans-serif;
 }
 
 #application-container {
@@ -16,7 +17,7 @@ body {
 
 #application-container .lake-outline {
   fill: #33CCFF;
-  fill-opacity: 0.75;
+  fill-opacity: 0.85;
   stroke-linejoin: round;
   stroke: #33CCFF;
   stroke-width: 2px;
@@ -24,8 +25,8 @@ body {
 }
 
 #application-container .progress {
-  fill: #F5B800;
-  fill-opacity: 0.5;
+  fill: #003DF5;
+  fill-opacity: 0.25;
   stroke: none;
   stroke-width: 0;
 }
@@ -36,13 +37,19 @@ body {
   left: 0;
   right: 0;
   text-align: center;
+  text-shadow: 0px 0px 12px rgba(150, 150, 150, 0.75);
+  font-size: 3em;
+  text-transform: uppercase;
+  opacity: 0.85;
 }
 
 #lake-name {
-  font-size: 3em;
-  text-transform: uppercase;
-  opacity: 0.9;
-  text-shadow: 0px 0px 12px rgba(150, 150, 150, 0.75);
+
+}
+
+#county-name {
+  color: #3366FF;
+  text-shadow: 0px 0px 12px rgba(51,102,255, 0.75);
 }
 
 #lake-name.unnamed {

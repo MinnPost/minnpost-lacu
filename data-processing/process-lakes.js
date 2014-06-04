@@ -45,13 +45,15 @@ function marginFromAcreage(acres) {
 // Process properties
 function transformProperties(feature) {
   var p = feature.properties;
+  var regexSubName = /unnamed\s*\((.*)\)/;
 
   // Create array instead of list
   p.ids = p.ids.split(',');
 
   // Reduce county name and remove duplicates
+  p.c = (!p.c) ? '' : p.c;
   p.c = p.c.split(',').reduce(function(p, c, i, a) {
-    if (p.indexOf(c) === -1) {
+    if (p.indexOf(c) === -1 && ['not in mn', 'sd', 'nd', 'canada', 'wi'].indexOf(c.toLowerCase()) === -1) {
       p.push(c);
     }
     return p;
@@ -65,6 +67,7 @@ function transformProperties(feature) {
       c = (c.indexOf('(') > 0 && c !== p) ? c.substring(0, c.indexOf('(') - 1).trim() : c
       return (!p) ? c : (p.length >= c.length) ? c : p;
     }, '');
+  p.n = (p.n.toLowerCase().match(regexSubName)) ? p.n.toLowerCase().match(regexSubName)[1] : p.n;
 
   return p;
 }
@@ -135,9 +138,9 @@ shapefile.read(lakesShapefile, function(error, collection) {
     var x = a.objects.l.geometries[0].properties.a;
     var y = b.objects.l.geometries[0].properties.a;
     // Largest first
-    return (x > y) ? -1 : ((x < y) ? 1 : 0);
+    //return (x > y) ? -1 : ((x < y) ? 1 : 0);
     // Smallest first
-    //return (x < y) ? -1 : ((x > y) ? 1 : 0);
+    return (x < y) ? -1 : ((x > y) ? 1 : 0);
   });
   fs.writeFileSync(lakesOutput, JSON.stringify(output));
 });

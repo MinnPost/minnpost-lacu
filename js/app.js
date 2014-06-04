@@ -28,7 +28,7 @@ function Lacu() {
     }
 
     // Reset lake index.  Only use when testing
-    this.resetLakeIndex();
+    //this.resetLakeIndex();
 
     this.lakes = data;
     this.sett();
@@ -72,19 +72,22 @@ function Lacu() {
         .append('rect')
           .attr('class', 'progress')
           .attr('filter', 'url(#blur-small)')
-          .attr('x', 0)
+          .attr('x', (this.width / 2) - (this.width * 0.01 / 2))
           .attr('y', 0)
-          .attr('width', this.width * 0.05)
+          .attr('width', this.width * 0.01)
           .attr('height', function(d) { return thisApp.height * d; });
 
     // Lake shape
     this.lakeGroup = this.svgCanvas.append('g');
     this.lake = this.lakeGroup.append('path')
       .attr('class', 'lake-outline')
-      //.attr('filter', 'url(#turbulence)');
+      .attr('filter', 'url(#turbulence)');
 
     // Lake name
     this.name = this.container.select('#lake-name');
+
+    // county name
+    this.county = this.container.select('#county-name');
 
     // Handle keys
     d3.select('body').on('keydown', function() {
@@ -128,6 +131,12 @@ function Lacu() {
     var properties = lakeGeom.features[0].properties;
     var lake = this.lakeGroup.select('.lake-outline');
 
+    // Check if last one
+    var last = (!this.lakes[this.lakeIndex + 1]);
+    if (last) {
+      this.playing = false;
+    }
+
     // Transition to new lake
     this.lake
       .attr('d', this.path(lakeGeom))
@@ -140,20 +149,25 @@ function Lacu() {
       .transition()
         .ease('sin')
         .duration(this.lakeTime * .05 * 1000)
-        .style('opacity', 0)
+        .style('opacity', (last) ? 1 : 0)
       .each('end', function() {
         if (thisApp.playing) {
           thisApp.go(++thisApp.lakeIndex);
         }
       });
 
-    // Handle name
+    // Lake name
     this.name
       .data([properties])
       .classed('unnamed', function(d) {
         return !d.n || d.n.toLowerCase() === 'unnamed';
       })
-      .text(function(d) { return ((d.n) ? d.n : 'unnamed') + ' (' + d.c + ')'; });
+      .text(function(d) { return (d.n) ? d.n : 'unnamed'; });
+
+    // County name
+    this.county
+      .data([properties])
+      .text(function(d) { return (d.c.length === 1) ? d.c[0] : d.c.split(', '); });
 
     // Update progress
     this.updateProgress();
