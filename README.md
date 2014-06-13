@@ -20,11 +20,9 @@ A list of datasets can be found from this [JS file](http://deli.dnr.state.mn.us/
 * (old lake source) [DNR 100K Lakes and Rivers](http://deli.dnr.state.mn.us/metadata.html?id=L390003700201)
     * [Data request link](http://deli.dnr.state.mn.us/cgi-bin/bundle.pl?layer=L390003700201&email=get%40data.com&assemblytype=tiles&data=lake_dnrpy2+mn&kbytes=1)
     * (time specific) [Direct bundle](ftp://ftp.dnr.state.mn.us/pub/deli/d15079344790019.zip)
+* PCA data provided directly via emails.
 
-
-
-
-
+## Attribution
 
 Person: http://thenounproject.com/term/person/8205/
 Minnesota: http://thenounproject.com/term/minnesota/19621/

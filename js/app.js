@@ -149,7 +149,7 @@ function Lacu() {
       .transition()
         .ease('sin')
         .duration(this.lakeTime * .05 * 1000)
-        .style('opacity', (last) ? 1 : 0)
+        .style('opacity', (last) ? 1 : 0.1)
       .each('end', function() {
         if (thisApp.playing) {
           thisApp.go(++thisApp.lakeIndex);

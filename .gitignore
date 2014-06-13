@@ -2,6 +2,8 @@
 data/original/*
 data/build/*
 
+# Undownloadable data
+!data/original/pca/
 
 # Common
 node_modules
