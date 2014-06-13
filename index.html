@@ -19,38 +19,72 @@
     </div>
 
     <div id="application-container">
-      <svg>
 
-        <defs>
-          <filter id="blur-small">
-            <feGaussianBlur stdDeviation="2"></feGaussianBlur>
+      <div id="lake-1" class="lake">
+        <svg>
+
+          <defs>
+            <filter id="blur-small">
+              <feGaussianBlur stdDeviation="2"></feGaussianBlur>
+            </filter>
+
+            <filter id="turbulence" >
+              <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+              <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="turbulence_3" data-filterId="3" />
+              <feDisplacementMap xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" in2="turbulence_3" scale="30" />
+            <filter />
+
+            <filter xmlns="http://www.w3.org/2000/svg" id="glow" height="150%" y="-25%">
+              <feFlood flood-color="white"/>
+              <feComposite in2="SourceAlpha" operator="in"/>
+              <feGaussianBlur stdDeviation="4"/>
+              <feComponentTransfer>
+                  <feFuncA type="linear" slope="3" intercept="0"/>
+              </feComponentTransfer>
+              <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+              </feMerge>
           </filter>
-
-          <filter id="turbulence" >
-            <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
-            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="turbulence_3" data-filterId="3" />
-            <feDisplacementMap xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" in2="turbulence_3" scale="30" />
-          <filter />
-
-          <filter xmlns="http://www.w3.org/2000/svg" id="glow" height="150%" y="-25%">
-            <feFlood flood-color="white"/>
-            <feComposite in2="SourceAlpha" operator="in"/>
-            <feGaussianBlur stdDeviation="4"/>
-            <feComponentTransfer>
-                <feFuncA type="linear" slope="3" intercept="0"/>
-            </feComponentTransfer>
-            <feMerge>
-                <feMergeNode/>
-                <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-        </filter>
-        </defs>
-      </svg>
-
-      <div id="lake-name-container">
-        <span id="lake-name"></span>
-        <span id="county-name"></span>
+          </defs>
+        </svg>
       </div>
+
+      <div id="lake-2" class="lake">
+        <svg>
+
+          <defs>
+            <filter id="blur-small">
+              <feGaussianBlur stdDeviation="2"></feGaussianBlur>
+            </filter>
+
+            <filter id="turbulence" >
+              <feGaussianBlur stdDeviation="0.5"></feGaussianBlur>
+              <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="turbulence_3" data-filterId="3" />
+              <feDisplacementMap xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" in2="turbulence_3" scale="30" />
+            <filter />
+
+            <filter xmlns="http://www.w3.org/2000/svg" id="glow" height="150%" y="-25%">
+              <feFlood flood-color="white"/>
+              <feComposite in2="SourceAlpha" operator="in"/>
+              <feGaussianBlur stdDeviation="4"/>
+              <feComponentTransfer>
+                  <feFuncA type="linear" slope="3" intercept="0"/>
+              </feComponentTransfer>
+              <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+          </filter>
+          </defs>
+        </svg>
+      </div>
+
+      <div id="lake-name-1" class="lake-name"></div>
+      <div id="county-name-1" class="county-name"></div>
+
+      <div id="lake-name-2" class="lake-name"></div>
+      <div id="county-name-2" class="county-name"></div>
     </div>
 
     <script src="bower_components/d3/d3.min.js"></script>

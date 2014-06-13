@@ -6,37 +6,38 @@
 // Class for application
 function Lacu() {
   // Common properties
-  this.width = 900;
-  this.height = 600;
+  this.width = 1440;
+  this.height = this.width * (10 / 16) * (1 / 3);
+  this.lakeCanvasWidth = this.width * (1 / 3);
   this.localStoragePrefix = 'lacu-';
   this.sparkDuration = 30300;
-  this.playing = false;
+  this.playing = true;
 
   // Let's get our massive dataset first
   this.data = function() {
     var thisApp = this;
     d3.json('data/lakes.json', function(error, data) {
-      thisApp.getReady(error, data);
+      thisApp.setData(error, data);
     });
   }
 
   // When data is loaded
-  this.getReady = function(error, data) {
+  this.setData = function(error, data) {
     if (error) {
       console.log(error);
       return;
     }
 
     // Reset lake index.  Only use when testing
-    //this.resetLakeIndex();
+    this.resetLakeIndex();
 
     this.lakes = data;
-    this.sett();
+    this.createCanvas();
     data = null;
   }
 
   // Some processing and setting up
-  this.sett = function() {
+  this.createCanvas = function() {
     var thisApp = this;
 
     // Determine time per lake
@@ -45,101 +46,96 @@ function Lacu() {
     // Make reference to container
     this.container = d3.select('#application-container');
 
+    // Remove intro
+    d3.select('#intro-container').transition().style('opacity', 0).remove();
+
     // Center canvas in window
     d3.select('#application-container')
       .style('top', ((window.innerHeight - this.height) / 2) + 'px')
       .style('left', ((window.innerWidth - this.width) / 2) + 'px');
 
-    // Draw canvas
-    this.svgCanvas = this.container.select('svg')
-      .attr('width', this.width)
-      .attr('height', this.height);
+    // Draw lake canvas and place in container
+    this.lakeCanvas = [];
+    this.lakeCanvas[0] = this.container.select('#lake-1 svg')
+      .attr('width', this.lakeCanvasWidth)
+      .attr('height', this.height)
+      .style('left', ((this.width / 2) - (this.width / 3)) + 'px');
+    this.lakeCanvas[1] = this.container.select('#lake-2 svg')
+      .attr('width', this.lakeCanvasWidth)
+      .attr('height', this.height)
+      .style('left', (this.width / 2) + 'px');
 
-    // Remove intro
-    d3.select('#intro-container').transition().style('opacity', 0).remove();
-
-    // Create path projection for lake data
-    this.path = d3.geo.path()
-      .projection(null);
-    this.lakeIndex = this.getLakeIndex();
-
-    // Progress bar
-    var progressData = this.lakeIndex / (this.lakes.length - 1);
-    this.progress = this.svgCanvas.selectAll('.progress')
-      .data([progressData]);
-    this.progress
-      .enter()
-        .append('rect')
-          .attr('class', 'progress')
-          .attr('filter', 'url(#blur-small)')
-          .attr('x', (this.width / 2) - (this.width * 0.01 / 2))
-          .attr('y', 0)
-          .attr('width', this.width * 0.01)
-          .attr('height', function(d) { return thisApp.height * d; });
-
-    // Lake shape
-    this.lakeGroup = this.svgCanvas.append('g');
-    this.lake = this.lakeGroup.append('path')
+    // Lake shapes
+    this.lake = [];
+    this.lake[0] = this.lakeCanvas[0].append('path')
+      .attr('class', 'lake-outline')
+      .attr('filter', 'url(#turbulence)');
+    this.lake[1] = this.lakeCanvas[1].append('path')
       .attr('class', 'lake-outline')
       .attr('filter', 'url(#turbulence)');
 
-    // Lake name
-    this.name = this.container.select('#lake-name');
+    // Create path projection for lake data
+    this.lakePath = d3.geo.path()
+      .projection(null);
 
-    // county name
-    this.county = this.container.select('#county-name');
+    // Lake names
+    this.lakeName = [];
+    this.lakeName[0] = this.container.select('#lake-name-1');
+    this.lakeName[1] = this.container.select('#lake-name-2');
 
-    // Handle keys
+    // County names
+    this.countyName = [];
+    this.countyName[0] = this.container.select('#county-name-1');
+    this.countyName[1] = this.container.select('#county-name-2');
+
+    // Handle keys (more for testing)
     d3.select('body').on('keydown', function() {
       if (d3.event.keyCode === 32) {
         thisApp.playing = !thisApp.playing;
-        thisApp.go(thisApp.lakeIndex);
+        thisApp.showSlide();
       }
       else if (d3.event.keyCode === 39) {
         thisApp.playing = false;
-        thisApp.go(++thisApp.lakeIndex);
+        thisApp.setLakeIndex(++thisApp.lakeIndex);
+        thisApp.showSlide();
       }
       else if (d3.event.keyCode === 37) {
         thisApp.playing = false;
-        thisApp.go(--thisApp.lakeIndex);
+        thisApp.setLakeIndex(--thisApp.lakeIndex);
+        thisApp.showSlide();
       }
     });
 
-    // By default start animation
-    thisApp.playing = true;
-    this.go(this.lakeIndex);
+    // Set current lake index and start
+    this.lakeIndex = this.getLakeIndex();
+    this.showSlide();
   }
 
   // Function for looping
-  this.go = function(index) {
+  this.showSlide = function(index) {
     var thisApp = this;
-
-    // Set new index
-    this.lakeIndex = index;
-    this.setLakeIndex(this.lakeIndex);
+    var l = [{}, {}];
 
     // Get lake data
-    var lakeData = this.lakes[this.lakeIndex];
+    l[0].i = (this.lakeIndex * 2);
+    l[1].i = (this.lakeIndex * 2) + 1;
+    l[0].l = this.lakes[l[0].i];
+    l[1].l = this.lakes[l[1].i];
 
-    // Make sure we have data
-    if (!lakeData) {
+    // Make sure we have data or is the last one
+    if ((!l[0].l && !l[1].l) || (!this.lakes[this.lakeIndex + 2])) {
+      this.finished();
       return;
     }
 
-    // Current lake
-    var lakeGeom = topojson.feature(lakeData, lakeData.objects.l);
-    var properties = lakeGeom.features[0].properties;
-    var lake = this.lakeGroup.select('.lake-outline');
-
-    // Check if last one
-    var last = (!this.lakes[this.lakeIndex + 1]);
-    if (last) {
-      this.playing = false;
-    }
+    // Lake parts
+    l[0].g = topojson.feature(l[0].l, l[0].l.objects.l);
+    l[1].g = topojson.feature(l[1].l, l[1].l.objects.l);
+    l[0].p = l[0].g.features[0].properties;
 
     // Transition to new lake
-    this.lake
-      .attr('d', this.path(lakeGeom))
+    this.lake[0]
+      .attr('d', this.lakePath(l[0].g))
       .transition()
         .ease('sin')
         .duration(this.lakeTime * .15 * 1000)
@@ -149,14 +145,31 @@ function Lacu() {
       .transition()
         .ease('sin')
         .duration(this.lakeTime * .05 * 1000)
-        .style('opacity', (last) ? 1 : 0.1)
+        .style('opacity', 0.1)
       .each('end', function() {
         if (thisApp.playing) {
-          thisApp.go(++thisApp.lakeIndex);
+          thisApp.setLakeIndex(++thisApp.lakeIndex);
+          thisApp.showSlide();
         }
       });
 
+    // Transition to new lake
+    this.lake[1]
+      .attr('d', this.lakePath(l[1].g))
+      .transition()
+        .ease('sin')
+        .duration(this.lakeTime * .15 * 1000)
+        .style('opacity', 1)
+      .transition()
+        .delay(this.lakeTime * .7 * 1000)
+      .transition()
+        .ease('sin')
+        .duration(this.lakeTime * .05 * 1000)
+        .style('opacity', 0.1);
+
+
     // Lake name
+    /*
     this.name
       .data([properties])
       .classed('unnamed', function(d) {
@@ -171,14 +184,12 @@ function Lacu() {
 
     // Update progress
     this.updateProgress();
+    */
   }
 
-  // Update progress
-  this.updateProgress = function() {
-    var thisApp = this;
-    this.progress = this.svgCanvas.selectAll('.progress')
-      .data([ this.lakeIndex / (this.lakes.length - 1) ])
-      .attr('height', function(d) { return thisApp.height * d; });
+  // All done
+  this.finished = function() {
+
   }
 
   // Get lake index
