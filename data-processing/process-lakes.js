@@ -16,13 +16,17 @@ require('d3-geo-projection')(d3);
 var lakesShapefile = path.join(__dirname, '../data/build/converted-4326-shps/water_dnr_hydrography.shp');
 var lakesShapefile = path.join(__dirname, '../data/build/converted-4326-shps/water_dnr_hydrography-TEST.shp');
 var lakesOutput = path.join(__dirname, '../data/lakes.json');
+var pcaConditionData = require('../data/build/pca_condition_summaries.json');
+var pcaTSIData = require('../data/build/pca_summary_tsi.json');
+var pcaTransparencyData = require('../data/build/pca_transparency_trends.json');
+var pcaWaterData = require('../data/build/pca_water_units.json');
 var finalLakes = {};
 
 // Configuration
-var canvasWidth = 900;
-var canvasHeight = 600;
-var marginMin = 0.03;
-var marginMax = 0.10;
+var canvasWidth = 1400;
+var canvasHeight = canvasWidth * (10 / 16) * (1 / 3);
+var lakeCanvasWidth = canvasWidth * (1 / 3);
+var lakeCanvasMargin = 0.3;
 var acreMin = 10;
 var acreMax = 1000;
 var uniqueID = 0;
@@ -31,15 +35,6 @@ var uniqueID = 0;
 function makeUniqueID() {
   uniqueID++;
   return uniqueID;
-}
-
-// Determine margin from acreage
-function marginFromAcreage(acres) {
-  if (acres > acreMax) {
-    return marginMin;
-  }
-  return marginMax - (((acres - acreMin) / (acreMax - acreMin)) *
-    (marginMax - marginMin));
 }
 
 // Process properties
@@ -103,9 +98,9 @@ shapefile.read(lakesShapefile, function(error, collection) {
     // Scale
     topo = topojson.scale(topo, {
       invert: false,
-      width: canvasWidth,
+      width: lakeCanvasWidth,
       height: canvasHeight,
-      margin: marginFromAcreage(acres) * canvasWidth
+      margin: lakeCanvasWidth * lakeCanvasMargin
     });
 
     // Simplify based on acreage
