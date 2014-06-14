@@ -35,6 +35,11 @@ body {
   fill-opacity: 0.9;
 }
 
+#area-progress .progress {
+  stroke: #D966FF;
+  fill: #D966FF;
+}
+
 .lake svg {
   position: absolute;
   top: 0px;

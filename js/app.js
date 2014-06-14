@@ -41,18 +41,19 @@ function Lacu() {
     data = null;
   }
 
-  // Next index (showing two at a time);
-  this.moveIndex = function(backwards) {
-    this.lakeIndex = this.lakeIndex + (2 * ((backwards === true) ? -1 : 1));
-    this.setLakeIndex(this.lakeIndex);
-  }
-
   // Some processing and setting up
   this.createCanvas = function() {
     var thisApp = this;
 
     // Determine time per lake
     this.lakeTime = Math.min((this.sparkDuration / this.lakes.length * 2).toFixed(2), 5);
+
+    // Get area range
+    this.areaScale = d3.scale.linear()
+      .domain([
+        topojson.feature(this.lakes[0], this.lakes[0].objects.l).features[0].properties.a,
+        topojson.feature(this.lakes[this.lakes.length - 1], this.lakes[this.lakes.length - 1].objects.l).features[0].properties.a
+      ]);
 
     // Make reference to container
     this.container = d3.select('#application-container');
@@ -67,22 +68,28 @@ function Lacu() {
       .style('top', ((window.innerHeight - this.height) / 2) + 'px')
       .style('left', ((window.innerWidth - this.width) / 2) + 'px');
 
-    // Create progress circle
+    // Create lake progress circle
     this.lakeProgress = this.progressCircle('#lake-progress',
       this.lakeProgressWidth,
       (this.width / 2) - (this.lakeProgressWidth / 2),
       (this.height * 0.01));
+
+    // Create lake area progress circle
+    this.areaProgress = this.progressCircle('#area-progress',
+      this.lakeProgressWidth,
+      (this.width / 2) - (this.lakeProgressWidth / 2),
+      (this.height - (this.height * 0.01) - (this.lakeProgressWidth)));
 
     // Draw lake canvas and place in container
     this.lakeCanvas = [];
     this.lakeCanvas[0] = this.container.select('#lake-1 svg')
       .attr('width', this.lakeCanvasWidth)
       .attr('height', this.height)
-      .style('left', ((this.width / 2) - (this.width / 3) - (this.lakeProgressWidth / 2)) + 'px');
+      .style('left', ((this.width / 2) - (this.width / 3) - (this.lakeProgressWidth / 2) - (this.lakeProgressWidth * 0.05)) + 'px');
     this.lakeCanvas[1] = this.container.select('#lake-2 svg')
       .attr('width', this.lakeCanvasWidth)
       .attr('height', this.height)
-      .style('left', ((this.width / 2) + (this.lakeProgressWidth / 2)) + 'px');
+      .style('left', ((this.width / 2) + (this.lakeProgressWidth / 2) + (this.lakeProgressWidth * 0.05)) + 'px');
 
     // Lake shapes
     this.lake = [];
@@ -143,13 +150,21 @@ function Lacu() {
     var partsNeeded = 2;
     var progress = this.lakeIndex / (this.lakes.length);
     var tween = _.sample(this.tweens);
+    var one = false;
 
     // Done.  Hacked way of handling multiple animations
     function allDone(partDone) {
       partsDone.push(partDone);
       if (thisApp.playing && partsDone.length == partsNeeded) {
-        thisApp.moveIndex();
-        thisApp.showSlide();
+
+        // Check if there is more
+        if (!thisApp.lakes[thisApp.lakeIndex + 2]) {
+          thisApp.finished();
+        }
+        else {
+          thisApp.moveIndex();
+          thisApp.showSlide();
+        }
       }
     }
 
@@ -159,20 +174,28 @@ function Lacu() {
     l[0].l = this.lakes[l[0].i];
     l[1].l = this.lakes[l[1].i];
 
-    // Make sure we have data or is the last one
-    if ((!l[0].l && !l[1].l) || (!this.lakes[this.lakeIndex + 2])) {
+    // Make sure we have data
+    if (!l[0].l && !l[1].l) {
       this.finished();
       return;
     }
 
+    // Check if there is only one
+    one = !!l[0].l;
+
     // Lake parts
     l[0].g = topojson.feature(l[0].l, l[0].l.objects.l);
-    l[1].g = topojson.feature(l[1].l, l[1].l.objects.l);
     l[0].p = l[0].g.features[0].properties;
-    l[1].p = l[1].g.features[0].properties;
+    if (one) {
+      l[1].g = topojson.feature(l[1].l, l[1].l.objects.l);
+      l[1].p = l[1].g.features[0].properties;
+    }
 
     // Update progress bar
     this.lakeProgress(progress);
+
+    // Update area scale
+    this.areaProgress(this.areaScale((one) ? l[0].p.a : Math.max(l[0].p.a, l[1].p.a)));
 
     // Transition lake 1
     this.lake[0]
@@ -187,16 +210,18 @@ function Lacu() {
       });
 
     // Transition lake 2
-    this.lake[1]
-      .transition()
-        .ease(tween)
-        .duration(this.lakeTime * .25 * 1000)
-        .attr('d', this.lakePath(l[1].g))
-      .transition()
-        .delay(this.lakeTime * .75 * 1000)
-      .each('end', function() {
-        allDone('lake1');
-      });
+    if (one) {
+      this.lake[1]
+        .transition()
+          .ease(tween)
+          .duration(this.lakeTime * .25 * 1000)
+          .attr('d', this.lakePath(l[1].g))
+        .transition()
+          .delay(this.lakeTime * .75 * 1000)
+        .each('end', function() {
+          allDone('lake1');
+        });
+    }
 
     // Lake name
     this.lakeNameContainer[0]
@@ -224,34 +249,43 @@ function Lacu() {
 
 
     // Lake name 2
-    this.lakeNameContainer[1]
-      .transition()
-        .ease(tween)
-        .duration(this.lakeTime * .10 * 1000)
-        .style('right', '-500px')
-      .each('end', function() {
-        // Change lake name
-        thisApp.lakeName[1]
-          .data([l[1].p])
-          .classed('unnamed', function(d) {
-            return !d.n || d.n.toLowerCase() === 'unnamed';
-          })
-          .text(function(d) { return (d.n) ? d.n : 'unnamed'; });
+    if (one) {
+      this.lakeNameContainer[1]
+        .transition()
+          .ease(tween)
+          .duration(this.lakeTime * .10 * 1000)
+          .style('right', '-500px')
+        .each('end', function() {
+          // Change lake name
+          thisApp.lakeName[1]
+            .data([l[1].p])
+            .classed('unnamed', function(d) {
+              return !d.n || d.n.toLowerCase() === 'unnamed';
+            })
+            .text(function(d) { return (d.n) ? d.n : 'unnamed'; });
 
-        // County name 1
-        thisApp.countyName[1]
-          .text(l[1].p.c);
-      })
-      .transition()
-        .ease(tween)
-        .duration(this.lakeTime * .15 * 1000)
-        .style('right', '0px');
-
+          // County name 1
+          thisApp.countyName[1]
+            .text(l[1].p.c);
+        })
+        .transition()
+          .ease(tween)
+          .duration(this.lakeTime * .15 * 1000)
+          .style('right', '0px');
+    }
   }
 
   // All done
   this.finished = function() {
+    console.log('finished');
+  }
 
+  // Next index (showing two at a time);
+  this.moveIndex = function(backwards) {
+    this.lakeIndex = this.lakeIndex + (2 * ((backwards === true) ? -1 : 1));
+    this.lakeIndex = Math.max(0, this.lakeIndex);
+    this.lakeIndex = Math.min(this.lakes.length - 1, this.lakeIndex);
+    this.setLakeIndex(this.lakeIndex);
   }
 
   // Make progress circle
@@ -309,7 +343,6 @@ function Lacu() {
 
     // Return function to update
     return function(progress) {
-      console.log(progress);
       p1.attr('d', arc.endAngle(Math.min(full, full * progress)));
       p2.attr('d', arc.endAngle(Math.min(full, full * progress)));
     }
