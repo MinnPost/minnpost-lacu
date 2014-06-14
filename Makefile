@@ -75,7 +75,7 @@ $(lake_converted): $(lake_shape)
 $(lake_test_converted): $(lake_shape)
 	mkdir -p $(converted_shps_dir)
 	ogr2ogr -f "ESRI Shapefile" $(lake_test_converted) $(lake_shape) -overwrite -dialect SQLite -sql \
-	"SELECT SUBSTR(DOWLKNUM, 1, LENGTH(DOWLKNUM) - 2) AS id, GROUP_CONCAT(DOWLKNUM) AS ids, SUM(ACRES) AS a, SUM(SHORE_MI) AS s, GROUP_CONCAT(LAKE_NAME) AS n, GROUP_CONCAT(CTY_NAME) AS c, ST_Union(geometry) as geometry FROM dnr_hydro_features_all WHERE WB_CLASS LIKE '%lake%' AND ACRES < 500 AND ACRES >= 10 AND DOWLKNUM <> '00000000' GROUP BY id LIMIT 300" -t_srs "EPSG:4326"
+	"SELECT SUBSTR(DOWLKNUM, 1, LENGTH(DOWLKNUM) - 2) AS id, GROUP_CONCAT(DOWLKNUM) AS ids, SUM(ACRES) AS a, SUM(SHORE_MI) AS s, GROUP_CONCAT(LAKE_NAME) AS n, GROUP_CONCAT(CTY_NAME) AS c, ST_Union(geometry) as geometry FROM dnr_hydro_features_all WHERE WB_CLASS LIKE '%lake%' AND ACRES < 3000 AND ACRES >= 1000 AND DOWLKNUM <> '00000000' GROUP BY id LIMIT 300" -t_srs "EPSG:4326"
 
 # The Excel Python librariy spits out a warning messsae, so we have to
 # delete the first row of output

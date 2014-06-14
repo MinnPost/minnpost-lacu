@@ -12,17 +12,17 @@ function Lacu() {
   this.width = 1440;
   this.height = this.width * (10 / 16) * (1 / 3);
   this.lakeCanvasWidth = this.width * (1 / 3);
-  this.lakeProgressWidth = this.width * 0.04;
+  this.lakeProgressWidth = this.width * 0.025;
   this.localStoragePrefix = 'lacu-';
   this.sparkDuration = 29000;
   this.playing = true;
   this.tweens = ['sin', 'circle', 'back', 'bounce'];
   this.flagColors = {
-    'nswim': '#EBB000',
+    'nswim': '#FFD24D',
     'swim': '#8CFF66',
-    'bqual': '#FF809F',
-    'nfish': '#FFC105',
-    'fish': '#80FF9F'
+    'bqual': '#99B3FF',
+    'fish': '#05FFC1',
+    'nfish': '#FFC105'
   };
 
   // Let's get our massive dataset first
@@ -41,7 +41,7 @@ function Lacu() {
     }
 
     // Reset lake index.  Only use when testing
-    this.resetLakeIndex();
+    //this.resetLakeIndex();
 
     this.lakes = data;
     this.createCanvas();
@@ -72,7 +72,7 @@ function Lacu() {
     d3.select('#application-container')
       .style('width', this.width + 'px')
       .style('min-height', this.height + 'px')
-      .style('top', ((window.innerHeight - this.height) / 2) + 'px')
+      .style('top', (Math.min((window.innerHeight - this.height) / 2), this.height * 0.1) + 'px')
       .style('left', ((window.innerWidth - this.width) / 2) + 'px');
 
     // Create lake progress circle
@@ -128,12 +128,12 @@ function Lacu() {
 
     // Flag metrics
     // nswim, swim, bqual, nfish, fish
+    var fCW = ((thisApp.height / 2) / 5);
+    var fW = fCW * 0.9;
     this.flags = [];
     this.flags[0] = {};
     this.flags[1] = {};
     [0, 1].forEach(function(i, ii) {
-      var fCW = ((thisApp.height / 2) / 5);
-      var fW = fCW * 0.9;
       var l = (i === 0) ? thisApp.width * 0.0075 :
         (thisApp.width - (thisApp.width * 0.0075) - (fCW))
 
@@ -145,6 +145,13 @@ function Lacu() {
           (i === 0) ? false : true);
       });
     });
+
+    // TSI value
+    this.tsiMeasure = [];
+    this.tsiMeasure[0] = this.progressCircle('#tsi-measure-1',
+      fW, (fCW * 1.25) + (thisApp.width * 0.0075), (thisApp.height / 2) + 3);
+    this.tsiMeasure[1] = this.progressCircle('#tsi-measure-2',
+      fW, this.width - ((fCW * 1.25) + (thisApp.width * 0.0075)) - fW, (thisApp.height / 2) + 3);
 
     // Handle events
     this.handleEvents();
@@ -195,7 +202,7 @@ function Lacu() {
     // Check if there is only one
     one = !l[0].l;
 
-    // Lake parts
+    // Lake parts and vales
     l[0].g = topojson.feature(l[0].l, l[0].l.objects.l);
     l[0].p = l[0].g.features[0].properties;
     if (!one) {
@@ -295,6 +302,36 @@ function Lacu() {
         f(l[1].p[fi], thisApp.lakeTime * .25 * 1000, tween);
       });
     }
+
+    // TSI Measures (0 is better)
+    d3.select('#tsi-measure-1')
+      .transition()
+        .ease(tween)
+        .duration(this.lakeTime * .10 * 1000)
+        .style('opacity', 0)
+        .each('end', function() {
+          thisApp.tsiMeasure[0]((l[0].p.tsi) ? 1 - (l[0].p.tsi / 100) : 0);
+        })
+      .transition()
+        .ease(tween)
+        .duration(this.lakeTime * .15 * 1000)
+        .style('opacity', 1)
+
+
+    if (!one) {
+      d3.select('#tsi-measure-2')
+        .transition()
+          .ease(tween)
+          .duration(this.lakeTime * .10 * 1000)
+          .style('opacity', 0)
+          .each('end', function() {
+            thisApp.tsiMeasure[1]((l[1].p.tsi) ? 1 - (l[1].p.tsi / 100) : 0);
+          })
+        .transition()
+          .ease(tween)
+          .duration(this.lakeTime * .15 * 1000)
+          .style('opacity', 1)
+    }
   }
 
   // All done
@@ -349,7 +386,7 @@ function Lacu() {
     var arc = d3.svg.arc()
       .startAngle(0)
       .innerRadius((width / 2) - (width * 0.01))
-      .outerRadius((width / 2) - (width * 0.05));
+      .outerRadius((width / 2) - (width * 0.075));
 
     // Full scale
     var scale = group.append('path')
@@ -365,8 +402,11 @@ function Lacu() {
 
     // Return function to update
     return function(progress) {
-      p1.attr('d', arc.endAngle(Math.min(full, full * progress)));
-      p2.attr('d', arc.endAngle(Math.min(full, full * progress)));
+      progress = parseFloat(progress);
+      p1.attr('d', arc.endAngle(Math.min(full, full * progress)))
+        .classed('no-value', (!progress || _.isNaN(progress)));
+      p2.attr('d', arc.endAngle(Math.min(full, full * progress)))
+        .classed('no-value', (!progress || _.isNaN(progress)));
     }
   }
 
@@ -388,12 +428,6 @@ function Lacu() {
       .classed('flag-metric', true)
       .classed(eClass, true)
       .attr('id', ident);
-
-    var scale = container.append('div')
-      .style('width', (w - margin) + 'px')
-      .style('height', (h - margin) + 'px')
-      .style('margin', margin + 'px')
-      .classed('scale', true);
 
     var value = container.append('div')
       .style('width', (w - margin) + 'px')

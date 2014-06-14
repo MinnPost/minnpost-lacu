@@ -35,6 +35,12 @@ body {
   fill-opacity: 0.9;
 }
 
+.progress-circle .progress.no-value {
+  stroke-width: 0;
+  stroke: none;
+  fill: none;
+}
+
 #area-progress .progress {
   stroke: #D966FF;
   fill: #D966FF;
@@ -61,7 +67,7 @@ body {
   left: 0px;
   margin: 1em 0 0 1em;
   text-align: left;
-  max-width: 25%;
+  max-width: 20%;
 }
 
 #lake-name-container-2 {
@@ -70,11 +76,11 @@ body {
   right: 0px;
   margin: 1em 1em 0 0;
   text-align: right;
-  max-width: 25%;
+  max-width: 20%;
 }
 
 .lake-name {
-  font-size: 2em;
+  font-size: 1.75em;
   text-transform: uppercase;
   opacity: 0.85;
   text-shadow: 0px 0px 12px rgba(150, 150, 150, 0.75);
@@ -88,7 +94,7 @@ body {
 
 .county-name {
   color: #3366FF;
-  font-size: 2em;
+  font-size: 1.5em;
   text-transform: uppercase;
   opacity: 0.85;
   text-shadow: 0px 0px 12px rgba(51, 102, 255, 0.75);
@@ -112,4 +118,21 @@ body {
   position: absolute;
   background-color: #F2F2F2;
   opacity: 0.35;
+}
+
+#tsi-measure-1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#tsi-measure-2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.tsi-measure .progress {
+  stroke: #386AFF;
+  fill: #386AFF;
 }

@@ -15,7 +15,7 @@ require('d3-geo-projection')(d3);
 
 // Inputs and outputs
 var lakesShapefile = path.join(__dirname, '../data/build/converted-4326-shps/water_dnr_hydrography.shp');
-var lakesShapefile = path.join(__dirname, '../data/build/converted-4326-shps/water_dnr_hydrography-TEST.shp');
+//var lakesShapefile = path.join(__dirname, '../data/build/converted-4326-shps/water_dnr_hydrography-TEST.shp');
 var lakesOutput = path.join(__dirname, '../data/lakes.json');
 var pcaConditionData = require('../data/build/pca_condition_summaries.json');
 var pcaTSIData = require('../data/build/pca_summary_tsi.json');
@@ -100,7 +100,7 @@ function transformProperties(feature) {
     var tsi = pcaTSIData[pcaID];
     if (tsi && tsi.ECOREGION) {
       p.r = (tsi.ECOREGION) ? tsi.ECOREGION : '';
-      p.tsi = (parseInt(tsi.OVERALL_TSI, 10)) ? parseInt(tsi.OVERALL_TSI, 10) : '';
+      p.tsi = (parseFloat(tsi.OVERALL_TSI)) ? parseFloat(tsi.OVERALL_TSI) : '';
     }
 
     // Transparency data (grouped)
