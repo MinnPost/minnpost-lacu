@@ -7,4 +7,6 @@ data/build/*
 
 # Common
 node_modules
-bower_components
+
+# Not bower so that it can be hosted on Github
+!bower_components
