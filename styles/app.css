@@ -10,9 +10,29 @@ body {
 }
 
 #application-container {
-  position: absolute;
+  position: relative;
   top: 0px;
   left: 0px;
+  overflow-x: none;
+}
+
+#progress-scale {
+  position: absolute;
+  left: 0;
+  top: 10px;
+}
+
+#progress-scale .scale {
+  stroke: none;
+  fill: #F2F2F2;
+  fill-opacity: 0.35;
+}
+
+#progress-scale .value {
+  stroke: #FF80DF;
+  stroke-width: 1px;
+  fill: #FF80DF;
+  fill-opacity: 0.9;
 }
 
 .lake svg {
@@ -30,9 +50,24 @@ body {
   stroke-opacity: 1;
 }
 
+#lake-name-container-1 {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  margin: 1em 0 0 1em;
+  text-align: left;
+}
+
+#lake-name-container-2 {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin: 1em 1em 0 0;
+  text-align: right;
+}
+
 .lake-name {
-  text-align: center;
-  font-size: 3em;
+  font-size: 2em;
   text-transform: uppercase;
   opacity: 0.85;
   text-shadow: 0px 0px 12px rgba(150, 150, 150, 0.75);
@@ -46,9 +81,8 @@ body {
 
 .county-name {
   color: #3366FF;
-  font-size: 3em;
-  text-align: center;
+  font-size: 2em;
   text-transform: uppercase;
   opacity: 0.85;
-  text-shadow: 0px 0px 12px rgba(51,102,255, 0.75);
+  text-shadow: 0px 0px 12px rgba(51, 102, 255, 0.75);
 }

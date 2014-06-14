@@ -18,6 +18,7 @@
   "dependencies": {
     "d3": "~3.4.8",
     "html5-boilerplate": "~4.3.0",
-    "topojson": "~1.6.13"
+    "topojson": "~1.6.13",
+    "underscore": "~1.6.0"
   }
 }

@@ -20,6 +20,17 @@
 
     <div id="application-container">
 
+      <div id="progress-scale">
+        <svg>
+
+          <defs>
+            <filter id="blur">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="7"></feGaussianBlur>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+
       <div id="lake-1" class="lake">
         <svg>
 
@@ -80,13 +91,18 @@
         </svg>
       </div>
 
-      <div id="lake-name-1" class="lake-name"></div>
-      <div id="county-name-1" class="county-name"></div>
+      <div id="lake-name-container-1">
+        <div id="lake-name-1" class="lake-name"></div>
+        <div id="county-name-1" class="county-name"></div>
+      </div>
 
-      <div id="lake-name-2" class="lake-name"></div>
-      <div id="county-name-2" class="county-name"></div>
+      <div id="lake-name-container-2">
+        <div id="lake-name-2" class="lake-name"></div>
+        <div id="county-name-2" class="county-name"></div>
+      </div>
     </div>
 
+    <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/d3/d3.min.js"></script>
     <script src="bower_components/topojson/topojson.js"></script>
     <script src="js/app.js"></script>

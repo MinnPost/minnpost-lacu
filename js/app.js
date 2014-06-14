@@ -1,6 +1,6 @@
 /**
  * Main application file for Lacu.
- * 9:01PM 5:26AM = 8 hr 25 min = 505 minutes = 30,300 seconds =
+ * 9:01PM 5:26AM = 8 hr 25 min = 505 minutes = 30,300 seconds - (some lee-way)
  */
 
 // Class for application
@@ -9,9 +9,11 @@ function Lacu() {
   this.width = 1440;
   this.height = this.width * (10 / 16) * (1 / 3);
   this.lakeCanvasWidth = this.width * (1 / 3);
+  this.progressCanvasWidth = this.width * 0.05;
   this.localStoragePrefix = 'lacu-';
-  this.sparkDuration = 30300;
+  this.sparkDuration = 29000;
   this.playing = true;
+  this.tweens = ['quad', 'cubic', 'sin', 'circle', 'back', 'bounce'];
 
   // Let's get our massive dataset first
   this.data = function() {
@@ -41,7 +43,7 @@ function Lacu() {
     var thisApp = this;
 
     // Determine time per lake
-    this.lakeTime = Math.min((this.sparkDuration / this.lakes.length).toFixed(2), 5);
+    this.lakeTime = Math.min((this.sparkDuration / this.lakes.length * 2).toFixed(2), 5);
 
     // Make reference to container
     this.container = d3.select('#application-container');
@@ -51,19 +53,45 @@ function Lacu() {
 
     // Center canvas in window
     d3.select('#application-container')
+      .style('width', this.width + 'px')
+      .style('min-height', this.height + 'px')
       .style('top', ((window.innerHeight - this.height) / 2) + 'px')
       .style('left', ((window.innerWidth - this.width) / 2) + 'px');
+
+    // Create progress circle
+    this.progress = {};
+    this.progress.w = this.progressCanvasWidth;
+    this.progress.container = d3.select('#progress-scale')
+      .style('left', ((this.width / 2) - (this.progress.w / 2)) + 'px');
+    this.progress.canvas = this.progress.container.select('svg')
+      .attr('width', this.progress.w)
+      .attr('height', this.progress.w);
+    this.progress.group = this.progress.canvas.append('g')
+      .attr('transform', 'translate(' + this.progress.w / 2 + ',' + this.progress.w / 2 + ')');
+    this.progress.arc = d3.svg.arc()
+      .startAngle(0)
+      .innerRadius((this.progress.w / 2) - 10)
+      .outerRadius((this.progress.w / 2) - 15);
+    this.progress.group.append('path')
+      .attr('class', 'scale')
+      .attr('d', this.progress.arc.endAngle(2 * Math.PI));
+    this.progress.p1 = this.progress.group.append('path')
+      .attr('class', 'value');
+    this.progress.p2 = this.progress.group.append('path')
+      .attr('class', 'value')
+      .attr('filter', 'url(#blur)');
+
 
     // Draw lake canvas and place in container
     this.lakeCanvas = [];
     this.lakeCanvas[0] = this.container.select('#lake-1 svg')
       .attr('width', this.lakeCanvasWidth)
       .attr('height', this.height)
-      .style('left', ((this.width / 2) - (this.width / 3)) + 'px');
+      .style('left', ((this.width / 2) - (this.width / 3) - (this.progressCanvasWidth / 2)) + 'px');
     this.lakeCanvas[1] = this.container.select('#lake-2 svg')
       .attr('width', this.lakeCanvasWidth)
       .attr('height', this.height)
-      .style('left', (this.width / 2) + 'px');
+      .style('left', ((this.width / 2) + (this.progressCanvasWidth / 2)) + 'px');
 
     // Lake shapes
     this.lake = [];
@@ -82,6 +110,11 @@ function Lacu() {
     this.lakeName = [];
     this.lakeName[0] = this.container.select('#lake-name-1');
     this.lakeName[1] = this.container.select('#lake-name-2');
+
+    // Lake names
+    this.lakeNameContainer = [];
+    this.lakeNameContainer[0] = this.container.select('#lake-name-container-1');
+    this.lakeNameContainer[1] = this.container.select('#lake-name-container-2');
 
     // County names
     this.countyName = [];
@@ -115,6 +148,18 @@ function Lacu() {
   this.showSlide = function(index) {
     var thisApp = this;
     var l = [{}, {}];
+    var partsDone = [];
+    var partsNeeded = 2;
+    var progress = this.lakeIndex / (this.lakes.length / 2);
+
+    // Done.  Hacked way of handling multiple animations
+    function allDone(partDone) {
+      partsDone.push(partDone);
+      if (thisApp.playing && partsDone.length == partsNeeded) {
+        thisApp.setLakeIndex(++thisApp.lakeIndex);
+        thisApp.showSlide();
+      }
+    }
 
     // Get lake data
     l[0].i = (this.lakeIndex * 2);
@@ -132,59 +177,87 @@ function Lacu() {
     l[0].g = topojson.feature(l[0].l, l[0].l.objects.l);
     l[1].g = topojson.feature(l[1].l, l[1].l.objects.l);
     l[0].p = l[0].g.features[0].properties;
+    l[1].p = l[1].g.features[0].properties;
 
-    // Transition to new lake
+    // Update progress bar
+    this.progress.p1
+      .attr('d', this.progress.arc.endAngle(2 * Math.PI * progress));
+    this.progress.p2
+      .attr('d', this.progress.arc.endAngle(2 * Math.PI * progress));
+
+    // Transition lake 1
     this.lake[0]
-      .attr('d', this.lakePath(l[0].g))
       .transition()
-        .ease('sin')
-        .duration(this.lakeTime * .15 * 1000)
-        .style('opacity', 1)
+        .ease(_.sample(this.tweens))
+        .duration(this.lakeTime * .25 * 1000)
+        .attr('d', this.lakePath(l[0].g))
       .transition()
-        .delay(this.lakeTime * .7 * 1000)
-      .transition()
-        .ease('sin')
-        .duration(this.lakeTime * .05 * 1000)
-        .style('opacity', 0.1)
+        .delay(this.lakeTime * .75 * 1000)
       .each('end', function() {
-        if (thisApp.playing) {
-          thisApp.setLakeIndex(++thisApp.lakeIndex);
-          thisApp.showSlide();
-        }
+        allDone('lake1');
       });
 
-    // Transition to new lake
+    // Transition lake 2
     this.lake[1]
-      .attr('d', this.lakePath(l[1].g))
       .transition()
-        .ease('sin')
-        .duration(this.lakeTime * .15 * 1000)
-        .style('opacity', 1)
+        .ease(_.sample(this.tweens))
+        .duration(this.lakeTime * .25 * 1000)
+        .attr('d', this.lakePath(l[1].g))
       .transition()
-        .delay(this.lakeTime * .7 * 1000)
-      .transition()
-        .ease('sin')
-        .duration(this.lakeTime * .05 * 1000)
-        .style('opacity', 0.1);
-
+        .delay(this.lakeTime * .75 * 1000)
+      .each('end', function() {
+        allDone('lake1');
+      });
 
     // Lake name
-    /*
-    this.name
-      .data([properties])
-      .classed('unnamed', function(d) {
-        return !d.n || d.n.toLowerCase() === 'unnamed';
+    this.lakeNameContainer[0]
+      .transition()
+        .ease(_.sample(this.tweens))
+        .duration(this.lakeTime * .15 * 1000)
+        .style('left', '-500px')
+      .each('end', function() {
+        // Change lake name
+        thisApp.lakeName[0]
+          .data([l[0].p])
+          .classed('unnamed', function(d) {
+            return !d.n || d.n.toLowerCase() === 'unnamed';
+          })
+          .text(function(d) { return (d.n) ? d.n : 'unnamed'; });
+
+        // County name 1
+        thisApp.countyName[0]
+          .text(l[0].p.c);
       })
-      .text(function(d) { return (d.n) ? d.n : 'unnamed'; });
+      .transition()
+        .ease(_.sample(this.tweens))
+        .duration(this.lakeTime * .15 * 1000)
+        .style('left', '0px');
 
-    // County name
-    this.county
-      .data([properties])
-      .text(function(d) { return (d.c.length === 1) ? d.c[0] : d.c.split(', '); });
 
-    // Update progress
-    this.updateProgress();
-    */
+    // Lake name 2
+    this.lakeNameContainer[1]
+      .transition()
+        .ease(_.sample(this.tweens))
+        .duration(this.lakeTime * .15 * 1000)
+        .style('right', '-500px')
+      .each('end', function() {
+        // Change lake name
+        thisApp.lakeName[1]
+          .data([l[1].p])
+          .classed('unnamed', function(d) {
+            return !d.n || d.n.toLowerCase() === 'unnamed';
+          })
+          .text(function(d) { return (d.n) ? d.n : 'unnamed'; });
+
+        // County name 1
+        thisApp.countyName[1]
+          .text(l[1].p.c);
+      })
+      .transition()
+        .ease(_.sample(this.tweens))
+        .duration(this.lakeTime * .15 * 1000)
+        .style('right', '0px');
+
   }
 
   // All done
