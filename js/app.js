@@ -1,6 +1,9 @@
 /**
  * Main application file for Lacu.
  * 9:01PM 5:26AM = 8 hr 25 min = 505 minutes = 30,300 seconds - (some lee-way)
+ *
+ * Do note that the main author on this was no D3 expert and this
+ * may be wildy bad code...
  */
 
 // Class for application
@@ -9,11 +12,11 @@ function Lacu() {
   this.width = 1440;
   this.height = this.width * (10 / 16) * (1 / 3);
   this.lakeCanvasWidth = this.width * (1 / 3);
-  this.progressCanvasWidth = this.width * 0.05;
+  this.lakeProgressWidth = this.width * 0.04;
   this.localStoragePrefix = 'lacu-';
   this.sparkDuration = 29000;
   this.playing = true;
-  this.tweens = ['quad', 'cubic', 'sin', 'circle', 'back', 'bounce'];
+  this.tweens = ['sin', 'circle', 'back', 'bounce'];
 
   // Let's get our massive dataset first
   this.data = function() {
@@ -38,6 +41,12 @@ function Lacu() {
     data = null;
   }
 
+  // Next index (showing two at a time);
+  this.moveIndex = function(backwards) {
+    this.lakeIndex = this.lakeIndex + (2 * ((backwards === true) ? -1 : 1));
+    this.setLakeIndex(this.lakeIndex);
+  }
+
   // Some processing and setting up
   this.createCanvas = function() {
     var thisApp = this;
@@ -59,39 +68,21 @@ function Lacu() {
       .style('left', ((window.innerWidth - this.width) / 2) + 'px');
 
     // Create progress circle
-    this.progress = {};
-    this.progress.w = this.progressCanvasWidth;
-    this.progress.container = d3.select('#progress-scale')
-      .style('left', ((this.width / 2) - (this.progress.w / 2)) + 'px');
-    this.progress.canvas = this.progress.container.select('svg')
-      .attr('width', this.progress.w)
-      .attr('height', this.progress.w);
-    this.progress.group = this.progress.canvas.append('g')
-      .attr('transform', 'translate(' + this.progress.w / 2 + ',' + this.progress.w / 2 + ')');
-    this.progress.arc = d3.svg.arc()
-      .startAngle(0)
-      .innerRadius((this.progress.w / 2) - 10)
-      .outerRadius((this.progress.w / 2) - 15);
-    this.progress.group.append('path')
-      .attr('class', 'scale')
-      .attr('d', this.progress.arc.endAngle(2 * Math.PI));
-    this.progress.p1 = this.progress.group.append('path')
-      .attr('class', 'value');
-    this.progress.p2 = this.progress.group.append('path')
-      .attr('class', 'value')
-      .attr('filter', 'url(#blur)');
-
+    this.lakeProgress = this.progressCircle('#lake-progress',
+      this.lakeProgressWidth,
+      (this.width / 2) - (this.lakeProgressWidth / 2),
+      (this.height * 0.01));
 
     // Draw lake canvas and place in container
     this.lakeCanvas = [];
     this.lakeCanvas[0] = this.container.select('#lake-1 svg')
       .attr('width', this.lakeCanvasWidth)
       .attr('height', this.height)
-      .style('left', ((this.width / 2) - (this.width / 3) - (this.progressCanvasWidth / 2)) + 'px');
+      .style('left', ((this.width / 2) - (this.width / 3) - (this.lakeProgressWidth / 2)) + 'px');
     this.lakeCanvas[1] = this.container.select('#lake-2 svg')
       .attr('width', this.lakeCanvasWidth)
       .attr('height', this.height)
-      .style('left', ((this.width / 2) + (this.progressCanvasWidth / 2)) + 'px');
+      .style('left', ((this.width / 2) + (this.lakeProgressWidth / 2)) + 'px');
 
     // Lake shapes
     this.lake = [];
@@ -129,12 +120,12 @@ function Lacu() {
       }
       else if (d3.event.keyCode === 39) {
         thisApp.playing = false;
-        thisApp.setLakeIndex(++thisApp.lakeIndex);
+        thisApp.moveIndex();
         thisApp.showSlide();
       }
       else if (d3.event.keyCode === 37) {
         thisApp.playing = false;
-        thisApp.setLakeIndex(--thisApp.lakeIndex);
+        thisApp.moveIndex(true);
         thisApp.showSlide();
       }
     });
@@ -150,20 +141,21 @@ function Lacu() {
     var l = [{}, {}];
     var partsDone = [];
     var partsNeeded = 2;
-    var progress = this.lakeIndex / (this.lakes.length / 2);
+    var progress = this.lakeIndex / (this.lakes.length);
+    var tween = _.sample(this.tweens);
 
     // Done.  Hacked way of handling multiple animations
     function allDone(partDone) {
       partsDone.push(partDone);
       if (thisApp.playing && partsDone.length == partsNeeded) {
-        thisApp.setLakeIndex(++thisApp.lakeIndex);
+        thisApp.moveIndex();
         thisApp.showSlide();
       }
     }
 
     // Get lake data
-    l[0].i = (this.lakeIndex * 2);
-    l[1].i = (this.lakeIndex * 2) + 1;
+    l[0].i = this.lakeIndex;
+    l[1].i = this.lakeIndex + 1;
     l[0].l = this.lakes[l[0].i];
     l[1].l = this.lakes[l[1].i];
 
@@ -180,15 +172,12 @@ function Lacu() {
     l[1].p = l[1].g.features[0].properties;
 
     // Update progress bar
-    this.progress.p1
-      .attr('d', this.progress.arc.endAngle(2 * Math.PI * progress));
-    this.progress.p2
-      .attr('d', this.progress.arc.endAngle(2 * Math.PI * progress));
+    this.lakeProgress(progress);
 
     // Transition lake 1
     this.lake[0]
       .transition()
-        .ease(_.sample(this.tweens))
+        .ease(tween)
         .duration(this.lakeTime * .25 * 1000)
         .attr('d', this.lakePath(l[0].g))
       .transition()
@@ -200,7 +189,7 @@ function Lacu() {
     // Transition lake 2
     this.lake[1]
       .transition()
-        .ease(_.sample(this.tweens))
+        .ease(tween)
         .duration(this.lakeTime * .25 * 1000)
         .attr('d', this.lakePath(l[1].g))
       .transition()
@@ -212,8 +201,8 @@ function Lacu() {
     // Lake name
     this.lakeNameContainer[0]
       .transition()
-        .ease(_.sample(this.tweens))
-        .duration(this.lakeTime * .15 * 1000)
+        .ease(tween)
+        .duration(this.lakeTime * .10 * 1000)
         .style('left', '-500px')
       .each('end', function() {
         // Change lake name
@@ -229,7 +218,7 @@ function Lacu() {
           .text(l[0].p.c);
       })
       .transition()
-        .ease(_.sample(this.tweens))
+        .ease(tween)
         .duration(this.lakeTime * .15 * 1000)
         .style('left', '0px');
 
@@ -237,8 +226,8 @@ function Lacu() {
     // Lake name 2
     this.lakeNameContainer[1]
       .transition()
-        .ease(_.sample(this.tweens))
-        .duration(this.lakeTime * .15 * 1000)
+        .ease(tween)
+        .duration(this.lakeTime * .10 * 1000)
         .style('right', '-500px')
       .each('end', function() {
         // Change lake name
@@ -254,7 +243,7 @@ function Lacu() {
           .text(l[1].p.c);
       })
       .transition()
-        .ease(_.sample(this.tweens))
+        .ease(tween)
         .duration(this.lakeTime * .15 * 1000)
         .style('right', '0px');
 
@@ -263,6 +252,67 @@ function Lacu() {
   // All done
   this.finished = function() {
 
+  }
+
+  // Make progress circle
+  this.progressCircle = function(selector, width, moveL, moveT) {
+    var full = 2 * Math.PI;
+
+    // Size container
+    var container = d3.select(selector)
+      .classed('progress-circle', true)
+      .style('width', width + 'px')
+      .style('height', width + 'px');
+
+    // Move
+    if (moveL) {
+      container.style('left', moveL + 'px');
+    }
+    if (moveT) {
+      container.style('top', moveT + 'px');
+    }
+
+    // SVG canvas
+    var svg = container.append('svg')
+      .attr('width', width)
+      .attr('height', width);
+
+    // Blur filter
+    svg.append('defs')
+      .append('filter')
+        .attr('id', 'blur')
+      .append('feGaussianBlur')
+        .attr('in', 'SourceGraphic')
+        .attr('stdDeviation', '5');
+
+    // Group for centering
+    var group = svg.append('g')
+      .attr('transform', 'translate(' + width / 2 + ',' + width / 2 + ')');
+
+    // Arc
+    var arc = d3.svg.arc()
+      .startAngle(0)
+      .innerRadius((width / 2) - (width * 0.01))
+      .outerRadius((width / 2) - (width * 0.05));
+
+    // Full scale
+    var scale = group.append('path')
+      .attr('class', 'scale')
+      .attr('d', arc.endAngle(full));
+
+    // Make progress parts (need a solid arc and a blurred arc)
+    var p1 = group.append('path')
+      .attr('class', 'progress');
+    var p2 = group.append('path')
+      .attr('class', 'progress')
+      .attr('filter', 'url(#blur)');
+
+    // Return function to update
+    return function(progress) {
+      console.log(progress);
+      p1.attr('d', arc.endAngle(Math.min(full, full * progress)));
+      p2.attr('d', arc.endAngle(Math.min(full, full * progress)));
+    }
   }
 
   // Get lake index
