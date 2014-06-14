@@ -93,3 +93,23 @@ body {
   opacity: 0.85;
   text-shadow: 0px 0px 12px rgba(51, 102, 255, 0.75);
 }
+
+.metric {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
+.metric.flag-metric .scale {
+  border-radius: 50%;
+  background-color: #F2F2F2;
+  opacity: 0.35;
+  position: absolute;
+}
+
+.metric.flag-metric .value {
+  border-radius: 50%;
+  position: absolute;
+  background-color: #F2F2F2;
+  opacity: 0.35;
+}

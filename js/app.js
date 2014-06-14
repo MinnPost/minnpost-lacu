@@ -17,6 +17,13 @@ function Lacu() {
   this.sparkDuration = 29000;
   this.playing = true;
   this.tweens = ['sin', 'circle', 'back', 'bounce'];
+  this.flagColors = {
+    'nswim': '#EBB000',
+    'swim': '#8CFF66',
+    'bqual': '#FF809F',
+    'nfish': '#FFC105',
+    'fish': '#80FF9F'
+  };
 
   // Let's get our massive dataset first
   this.data = function() {
@@ -119,23 +126,28 @@ function Lacu() {
     this.countyName[0] = this.container.select('#county-name-1');
     this.countyName[1] = this.container.select('#county-name-2');
 
-    // Handle keys (more for testing)
-    d3.select('body').on('keydown', function() {
-      if (d3.event.keyCode === 32) {
-        thisApp.playing = !thisApp.playing;
-        thisApp.showSlide();
-      }
-      else if (d3.event.keyCode === 39) {
-        thisApp.playing = false;
-        thisApp.moveIndex();
-        thisApp.showSlide();
-      }
-      else if (d3.event.keyCode === 37) {
-        thisApp.playing = false;
-        thisApp.moveIndex(true);
-        thisApp.showSlide();
-      }
+    // Flag metrics
+    // nswim, swim, bqual, nfish, fish
+    this.flags = [];
+    this.flags[0] = {};
+    this.flags[1] = {};
+    [0, 1].forEach(function(i, ii) {
+      var fCW = ((thisApp.height / 2) / 5);
+      var fW = fCW * 0.9;
+      var l = (i === 0) ? thisApp.width * 0.0075 :
+        (thisApp.width - (thisApp.width * 0.0075) - (fCW))
+
+      Object.keys(thisApp.flagColors).forEach(function(f, fi) {
+        thisApp.flags[i][f] = thisApp.flagButton(
+          f + '-' + i, f, fW, fW, l,
+          (thisApp.height / 2) + (fCW * fi),
+          thisApp.flagColors[f],
+          (i === 0) ? false : true);
+      });
     });
+
+    // Handle events
+    this.handleEvents();
 
     // Set current lake index and start
     this.lakeIndex = this.getLakeIndex();
@@ -181,12 +193,12 @@ function Lacu() {
     }
 
     // Check if there is only one
-    one = !!l[0].l;
+    one = !l[0].l;
 
     // Lake parts
     l[0].g = topojson.feature(l[0].l, l[0].l.objects.l);
     l[0].p = l[0].g.features[0].properties;
-    if (one) {
+    if (!one) {
       l[1].g = topojson.feature(l[1].l, l[1].l.objects.l);
       l[1].p = l[1].g.features[0].properties;
     }
@@ -210,7 +222,7 @@ function Lacu() {
       });
 
     // Transition lake 2
-    if (one) {
+    if (!one) {
       this.lake[1]
         .transition()
           .ease(tween)
@@ -249,7 +261,7 @@ function Lacu() {
 
 
     // Lake name 2
-    if (one) {
+    if (!one) {
       this.lakeNameContainer[1]
         .transition()
           .ease(tween)
@@ -272,6 +284,16 @@ function Lacu() {
           .ease(tween)
           .duration(this.lakeTime * .15 * 1000)
           .style('right', '0px');
+    }
+
+    // Update flags
+    _.each(this.flags[0], function(f, fi) {
+      f(l[0].p[fi], thisApp.lakeTime * .25 * 1000, tween);
+    });
+    if (!one) {
+      _.each(this.flags[1], function(f, fi) {
+        f(l[1].p[fi], thisApp.lakeTime * .25 * 1000, tween);
+      });
     }
   }
 
@@ -348,6 +370,101 @@ function Lacu() {
     }
   }
 
+  // Makes flag button
+  this.flagButton = function(ident, eClass, w, h, l, t, color, opposite) {
+    opposite = opposite || false;
+    var thisApp = this;
+    var margin = (w * 0.2);
+    var rgb = this.hexToRgb(color);
+    var shadow = '0px 0px ' + margin + 'px 1px rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 0.75)';
+
+    // Container
+    var container = this.container.append('div')
+      .style('width', w + 'px')
+      .style('height', h + 'px')
+      .style('top', t + 'px')
+      .style('left', l + 'px')
+      .classed('metric', true)
+      .classed('flag-metric', true)
+      .classed(eClass, true)
+      .attr('id', ident);
+
+    var scale = container.append('div')
+      .style('width', (w - margin) + 'px')
+      .style('height', (h - margin) + 'px')
+      .style('margin', margin + 'px')
+      .classed('scale', true);
+
+    var value = container.append('div')
+      .style('width', (w - margin) + 'px')
+      .style('height', (h - margin) + 'px')
+      .style('margin', margin + 'px')
+      .classed('value', true);
+
+    return function(on, time, tween) {
+      on = !!on;
+      var x = Math.random() * (thisApp.width);
+      var y = 500;
+
+      // if on the right
+      x = (opposite) ? x * -1 : x;
+
+      // Move value to place, change value, then move back
+      value
+        .transition()
+          .ease(tween)
+          .duration(time / 2)
+          .style({
+            'left': x + 'px',
+            'top': y + 'px'
+          })
+        .each('end', function() {
+          if (on) {
+            d3.select(this).style('background-color', color)
+              .style('opacity', 1)
+              .style('box-shadow', shadow);
+          }
+          else {
+            d3.select(this).style('background-color', '#F2F2F2')
+              .style('opacity', 0.35)
+              .style('box-shadow', 'none');
+          }
+        })
+        .transition()
+          .ease(tween)
+          .duration(time / 2)
+          .style({
+            'left': '0px',
+            'top': '0px'
+          });
+    }
+  }
+
+  // Handle events (mostly for testing)
+  this.handleEvents = function() {
+    var thisApp = this;
+
+    d3.select('body').on('keydown', function() {
+      // Space bar
+      if (d3.event.keyCode === 32) {
+        thisApp.playing = !thisApp.playing;
+        thisApp.showSlide();
+      }
+      // right arrow
+      else if (d3.event.keyCode === 39) {
+        thisApp.playing = false;
+        thisApp.moveIndex();
+        thisApp.showSlide();
+      }
+      // left arrow
+      else if (d3.event.keyCode === 37) {
+        thisApp.playing = false;
+        thisApp.moveIndex(true);
+        thisApp.showSlide();
+      }
+    });
+  }
+
   // Get lake index
   this.getLakeIndex = function() {
     // Store index locally, so we don't have to start over
@@ -372,6 +489,17 @@ function Lacu() {
   this.resetLakeIndex = function() {
     localStorage.removeItem(this.localStoragePrefix + '-index');
     return 0;
+  }
+
+  // Hex to rgb
+  // http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+  this.hexToRgb = function(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
   }
 }
 
