@@ -40,12 +40,12 @@ function Lacu() {
       return;
     }
 
-    // Reset lake index.  Only use when testing
-    this.resetLakeIndex();
-
     this.lakes = data;
 
-    this.lakeIndex = this.lakes.length - 3;
+    // Reset lake index.  Only use when testing
+    //this.resetLakeIndex();
+    //this.setLakeIndex(this.lakes.length - 3);
+
     this.createCanvas();
     data = null;
   }
@@ -202,7 +202,7 @@ function Lacu() {
     }
 
     // Check if there is only one
-    one = !l[0].l;
+    one = !l[1].l;
 
     // Lake parts and vales
     l[0].g = topojson.feature(l[0].l, l[0].l.objects.l);
