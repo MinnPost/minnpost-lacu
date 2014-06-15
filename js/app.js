@@ -41,9 +41,11 @@ function Lacu() {
     }
 
     // Reset lake index.  Only use when testing
-    //this.resetLakeIndex();
+    this.resetLakeIndex();
 
     this.lakes = data;
+
+    this.lakeIndex = this.lakes.length - 3;
     this.createCanvas();
     data = null;
   }
@@ -56,10 +58,10 @@ function Lacu() {
     this.lakeTime = Math.min((this.sparkDuration / this.lakes.length * 2).toFixed(2), 5);
 
     // Get area range
-    this.areaScale = d3.scale.linear()
+    this.areaScale = d3.scale.log()
       .domain([
         topojson.feature(this.lakes[0], this.lakes[0].objects.l).features[0].properties.a,
-        topojson.feature(this.lakes[this.lakes.length - 1], this.lakes[this.lakes.length - 1].objects.l).features[0].properties.a
+        topojson.feature(this.lakes[this.lakes.length - 2], this.lakes[this.lakes.length - 2].objects.l).features[0].properties.a
       ]);
 
     // Make reference to container
@@ -72,7 +74,7 @@ function Lacu() {
     d3.select('#application-container')
       .style('width', this.width + 'px')
       .style('min-height', this.height + 'px')
-      .style('top', (Math.min((window.innerHeight - this.height) / 2), this.height * 0.1) + 'px')
+      .style('top', ((window.innerHeight - this.height) / 2) + 'px')
       .style('left', ((window.innerWidth - this.width) / 2) + 'px');
 
     // Create lake progress circle
@@ -460,7 +462,7 @@ function Lacu() {
           }
           else {
             d3.select(this).style('background-color', '#F2F2F2')
-              .style('opacity', 0.35)
+              .style('opacity', 0.75)
               .style('box-shadow', 'none');
           }
         })
