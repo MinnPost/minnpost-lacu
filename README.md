@@ -1,15 +1,8 @@
 # Lacu
 
-Northern Spark lake art.
+Northern Spark lake art.  View demo at [code.minnpost.com/minnpost-lacu](http://code.minnpost.com/minnpost-lacu/).
 
 DNR says there are 11,842 lakes (10+ acres), but with their data and grouping by basin, we were able to get 13,817 lakes.  The different may be that the data provided by the DNR does not differentiate natural and man-made lakes?
-
-## Notes
-
-* http://en.wikipedia.org/wiki/List_of_lakes_in_Minnesota
-* http://www.dnr.state.mn.us/faq/mnfacts/water.html
-* http://www.dnr.state.mn.us/lakes/faqs.html
-  * "Generally, a lake is an area of open, relatively deep water that is large enough to produce a wave-swept shore."
 
 ## Data
 
@@ -32,3 +25,10 @@ The MPCA provides nice API's, but bulk files were emailed directly to us and inc
 * TSI Summaries are data use to calculate the [Trophic State Index](http://www.lakeaccess.org/lakedata/datainfotsi.html).  "Trophic State Indices (TSIs) are an attempt to provide a single quantitative index for the purpose of classifying and ranking lakes, most often from the standpoint of assessing water quality."
 * Transparency Trends are narratives of the transparency trends for each water unit (lake).
 * Water Units are basic info on each water unit (lake).
+
+## Notes
+
+* http://en.wikipedia.org/wiki/List_of_lakes_in_Minnesota
+* http://www.dnr.state.mn.us/faq/mnfacts/water.html
+* http://www.dnr.state.mn.us/lakes/faqs.html
+  * "Generally, a lake is an area of open, relatively deep water that is large enough to produce a wave-swept shore."
