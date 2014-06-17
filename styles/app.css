@@ -9,6 +9,24 @@ body {
   font-family: Montserrat, Georgia, 'Times New Roman', Times, sans-serif;
 }
 
+a {
+  color: #33CCFF;
+}
+
+#intro-container {
+  text-align: center;
+}
+
+#intro-container img {
+  max-width: 10em;
+}
+
+#intro-container .intro-text {
+  font-size: 1.25em;
+  max-width: 34em;
+  margin: 0 auto 1.25em auto;
+}
+
 #application-container {
   position: relative;
   top: 0px;

@@ -44,7 +44,7 @@ function Lacu() {
 
     // Reset lake index.  Only use when testing
     //this.resetLakeIndex();
-    //this.setLakeIndex(this.lakes.length - 3);
+    this.setLakeIndex(Math.floor(Math.random() * (this.lakes.length - 10)));
 
     this.createCanvas();
     data = null;
@@ -203,6 +203,7 @@ function Lacu() {
 
     // Check if there is only one
     one = !l[1].l;
+    partsNeeded = (one) ? partsNeeded - 1 : partsNeeded;
 
     // Lake parts and vales
     l[0].g = topojson.feature(l[0].l, l[0].l.objects.l);
