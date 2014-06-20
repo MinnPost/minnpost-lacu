@@ -32,3 +32,38 @@ The MPCA provides nice API's, but bulk files were emailed directly to us and inc
 * http://www.dnr.state.mn.us/faq/mnfacts/water.html
 * http://www.dnr.state.mn.us/lakes/faqs.html
   * "Generally, a lake is an area of open, relatively deep water that is large enough to produce a wave-swept shore."
+  
+## About Us
+
+MinnData, the MinnPost data team, is Alan, Tom, and Kaeti and all the awesome contributors to open source projects we utilize.  See our work at [minnpost.com/data](http://minnpost.com/data).
+
+```
+
+                                                   .--.
+                                                   `.  \
+                                                     \  \
+                                                      .  \
+                                                      :   .
+                                                      |    .
+                                                      |    :
+                                                      |    |
+      ..._  ___                                       |    |
+     `."".`''''""--..___                              |    |
+     ,-\  \             ""-...__         _____________/    |
+     / ` " '                    `""""""""                  .
+     \                                                      L
+     (>                                                      \
+    /                                                         \
+    \_    ___..---.                                            L
+      `--'         '.                                           \
+                     .                                           \_
+                    _/`.                                           `.._
+                 .'     -.                                             `.
+                /     __.-Y     /''''''-...___,...--------.._            |
+               /   _."    |    /                ' .      \   '---..._    |
+              /   /      /    /                _,. '    ,/           |   |
+              \_,'     _.'   /              /''     _,-'            _|   |
+                      '     /               `-----''               /     |
+                      `...-'                                       `...-'
+
+```
